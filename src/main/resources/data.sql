@@ -1,0 +1,1 @@
+insert into product values (1, 'aCode', 'EUR', 'productDescription', 12.54, 10, true);
