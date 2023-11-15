@@ -2,8 +2,10 @@ package ro.ctrln.entities;
 
 import lombok.Getter;
 import lombok.Setter;
+import ro.ctrln.enums.Roles;
 
 import javax.persistence.*;
+import java.util.Collection;
 
 @Entity
 @Getter
@@ -30,4 +32,10 @@ public class User {
 
     @Embedded
     private Address address;
+
+    @ElementCollection
+    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "roles")
+    @Enumerated(EnumType.STRING)
+    private Collection<Roles> roles;
 }
