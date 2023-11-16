@@ -26,4 +26,9 @@ public class ProductService {
         }
         return productMapper.toDTO(product.get());
     }
+
+    public void addProduct(ProductDTO productDTO, Long customerId) {
+        Product product = productMapper.toEntity(productDTO);
+        productRepository.save(product);
+    }
 }

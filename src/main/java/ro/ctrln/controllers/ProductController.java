@@ -20,6 +20,6 @@ public class ProductController {
 
     @PostMapping("/{customerId}")
     public void addProduct(@RequestBody ProductDTO productDTO, @PathVariable Long customerId) {
-
+        productService.addProduct(productDTO, customerId);
     }
 }

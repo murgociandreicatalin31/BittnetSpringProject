@@ -21,4 +21,20 @@ public class ProductMapper {
         productDTO.setCurrency(product.getCurrency());
         return productDTO;
     }
+
+    public Product toEntity(ProductDTO productDTO) {
+        if(productDTO == null) {
+            return null;
+        }
+
+        Product product = new Product();
+        product.setCode(productDTO.getCode());
+        product.setId(productDTO.getId());
+        product.setPrice(productDTO.getPrice());
+        product.setDescription(productDTO.getDescription());
+        product.setValid(productDTO.isValid());
+        product.setCurrency(productDTO.getCurrency());
+        product.setStock(productDTO.getStock());
+        return product;
+    }
 }

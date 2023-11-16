@@ -1,4 +1,4 @@
-insert into product values (1, 'aCode', 'EUR', 'productDescription', 12.54, 10, true);
+--insert into product values (1, 'aCode', 'EUR', 'productDescription', 12.54, 10, true);
 
 insert into shop_user (username, password, firstname, surname, city, number, street, zipcode)
 values ('sallyanne', 'password', 'Sally', 'Anne', 'Bucuresti', '1', 'Aviatorilor', '123456'),
