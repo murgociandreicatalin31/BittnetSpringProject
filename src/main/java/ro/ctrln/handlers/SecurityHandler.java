@@ -16,7 +16,7 @@ public class SecurityHandler {
     }
 
     @ExceptionHandler(InvalidOperationException.class)
-    public ResponseEntity<String> handleInvalidOperationException() {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Customer NOT allowed to add products!");
+    public ResponseEntity<String> handleInvalidOperationException(InvalidOperationException exception) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
     }
 }

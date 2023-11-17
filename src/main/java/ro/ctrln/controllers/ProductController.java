@@ -22,4 +22,9 @@ public class ProductController {
     public void addProduct(@RequestBody ProductDTO productDTO, @PathVariable Long customerId) {
         productService.addProduct(productDTO, customerId);
     }
+
+    @PutMapping("/{customerId}")
+    public void updateProduct(@RequestBody ProductDTO productDTO,@PathVariable Long customerId) throws InvalidProductCodeException {
+        productService.updateProduct(productDTO, customerId);
+    }
 }

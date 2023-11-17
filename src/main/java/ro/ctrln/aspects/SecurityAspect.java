@@ -29,6 +29,11 @@ public class SecurityAspect {
 
     }
 
+    @Pointcut("execution(* ro.ctrln.services.ProductService.updateProduct(..))")
+    public void updateProductPointcut() {
+
+    }
+
     @Before("ro.ctrln.aspects.SecurityAspect.addProductPointcut()")
     public void checkSecurityBeforeAddingProduct(JoinPoint joinPoint) throws InvalidCustomerIdException, InvalidOperationException {
         Long customerId = (Long) joinPoint.getArgs()[1];
@@ -40,10 +45,31 @@ public class SecurityAspect {
         User user = userOptional.get();
 
         if(userIsNotAllowedToAddProduct(user.getRoles())) {
-            throw new InvalidOperationException();
+            throw new InvalidOperationException("Customer NOT allowed to add products!");
         }
 
-        log.info("Customer ID: {} will modify the product!", customerId);
+        log.info("Customer ID: {} will ADD the product!", customerId);
+    }
+
+    @Before("ro.ctrln.aspects.SecurityAspect.updateProductPointcut()")
+    public void checkSecurityBeforeUpdatingProduct(JoinPoint joinPoint) throws InvalidCustomerIdException, InvalidOperationException {
+        Long customerId = (Long) joinPoint.getArgs()[1];
+        Optional<User> userOptional = userRepository.findById(customerId);
+        if(!userOptional.isPresent()) {
+            throw new InvalidCustomerIdException();
+        }
+
+        User user = userOptional.get();
+
+        if(userIsNotAllowedToUpdateProduct(user.getRoles())) {
+            throw new InvalidOperationException("Customer NOT allowed to update products!");
+        }
+
+        log.info("Customer ID: {} will UPDATE the product!", customerId);
+    }
+
+    private boolean userIsNotAllowedToUpdateProduct(Collection<Roles> roles) {
+        return !roles.contains(Roles.ADMIN) && !roles.contains(Roles.EDITOR);
     }
 
     private boolean userIsNotAllowedToAddProduct(Collection<Roles> roles) {
