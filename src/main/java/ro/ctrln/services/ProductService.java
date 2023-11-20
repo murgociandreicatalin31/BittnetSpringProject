@@ -9,7 +9,9 @@ import ro.ctrln.exceptions.InvalidProductCodeException;
 import ro.ctrln.mappers.ProductMapper;
 import ro.ctrln.repositories.ProductRepository;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -22,11 +24,8 @@ public class ProductService {
     private ProductMapper productMapper;
 
     public ProductDTO getProduct(String productCode) throws InvalidProductCodeException {
-        Optional<Product> product = productRepository.findByCode(productCode);
-        if(!product.isPresent()) {
-            throw new InvalidProductCodeException();
-        }
-        return productMapper.toDTO(product.get());
+        Product product = getProductEntity(productCode);
+        return productMapper.toDTO(product);
     }
 
     public void addProduct(ProductDTO productDTO, Long customerId) {
@@ -36,16 +35,11 @@ public class ProductService {
 
     public void updateProduct(ProductDTO productDTO, Long customerId) throws InvalidProductCodeException {
         log.info("Customer with id {} is trying to update product {}", customerId, productDTO.getCode());
-        if(productDTO.getCode() == null) {
+        if (productDTO.getCode() == null) {
             throw new InvalidProductCodeException();
         }
 
-        Optional<Product> productOptional = productRepository.findByCode(productDTO.getCode());
-        if(!productOptional.isPresent()) {
-            throw new InvalidProductCodeException();
-        }
-
-        Product product = productOptional.get();
+        Product product = getProductEntity(productDTO.getCode());
         product.setDescription(productDTO.getDescription());
         product.setPrice(productDTO.getPrice());
         product.setCurrency(productDTO.getCurrency());
@@ -53,5 +47,26 @@ public class ProductService {
         product.setStock(productDTO.getStock());
 
         productRepository.save(product);
+    }
+
+    public void deleteProduct(String productCode, Long customerId) throws InvalidProductCodeException {
+        log.info("Customer with id {} is trying to delete product {}", customerId, productCode);
+        if (productCode == null) {
+            throw new InvalidProductCodeException();
+        }
+        Product product = getProductEntity(productCode);
+        productRepository.delete(product);
+    }
+
+    private Product getProductEntity(String productCode) throws InvalidProductCodeException {
+        Optional<Product> product = productRepository.findByCode(productCode);
+        if (!product.isPresent()) {
+            throw new InvalidProductCodeException();
+        }
+        return product.get();
+    }
+
+    public List<ProductDTO> getProducts() {
+        return productRepository.findAll().stream().map(productMapper::toDTO).collect(Collectors.toList());
     }
 }

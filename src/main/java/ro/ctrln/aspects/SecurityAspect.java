@@ -34,6 +34,11 @@ public class SecurityAspect {
 
     }
 
+    @Pointcut("execution(* ro.ctrln.services.ProductService.deleteProduct(..))")
+    public void deleteProductPointcut() {
+
+    }
+
     @Before("ro.ctrln.aspects.SecurityAspect.addProductPointcut()")
     public void checkSecurityBeforeAddingProduct(JoinPoint joinPoint) throws InvalidCustomerIdException, InvalidOperationException {
         Long customerId = (Long) joinPoint.getArgs()[1];
@@ -66,6 +71,27 @@ public class SecurityAspect {
         }
 
         log.info("Customer ID: {} will UPDATE the product!", customerId);
+    }
+
+    @Before("ro.ctrln.aspects.SecurityAspect.deleteProductPointcut()")
+    public void checkSecurityBeforeDeletingProduct(JoinPoint joinPoint) throws InvalidCustomerIdException, InvalidOperationException {
+        Long customerId = (Long) joinPoint.getArgs()[1];
+        Optional<User> userOptional = userRepository.findById(customerId);
+        if(!userOptional.isPresent()) {
+            throw new InvalidCustomerIdException();
+        }
+
+        User user = userOptional.get();
+
+        if(userIsNotAllowedToDeleteProduct(user.getRoles())) {
+            throw new InvalidOperationException("Customer NOT allowed to delete products!");
+        }
+
+        log.info("Customer ID: {} will DELETE the product!", customerId);
+    }
+
+    private boolean userIsNotAllowedToDeleteProduct(Collection<Roles> roles) {
+        return !roles.contains(Roles.ADMIN);
     }
 
     private boolean userIsNotAllowedToUpdateProduct(Collection<Roles> roles) {
