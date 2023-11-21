@@ -1,5 +1,6 @@
 package ro.ctrln.services;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,22 +16,23 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class ProductService {
 
     @Autowired
-    private ProductRepository productRepository;
+    private final ProductRepository productRepository;
 
     @Autowired
-    private ProductMapper productMapper;
-
-    public ProductDTO getProduct(String productCode) throws InvalidProductCodeException {
-        Product product = getProductEntity(productCode);
-        return productMapper.toDTO(product);
-    }
+    private final ProductMapper productMapper;
 
     public void addProduct(ProductDTO productDTO, Long customerId) {
         Product product = productMapper.toEntity(productDTO);
         productRepository.save(product);
+    }
+
+    public ProductDTO getProduct(String productCode) throws InvalidProductCodeException {
+        Product product = getProductEntity(productCode);
+        return productMapper.toDTO(product);
     }
 
     public void updateProduct(ProductDTO productDTO, Long customerId) throws InvalidProductCodeException {
