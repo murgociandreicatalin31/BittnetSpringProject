@@ -15,6 +15,8 @@ import ro.ctrln.exceptions.InvalidProductCodeException;
 import ro.ctrln.mappers.ProductMapper;
 import ro.ctrln.repositories.ProductRepository;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
@@ -101,5 +103,100 @@ public class ProductServiceTest {
 
         verify(productRepository).findByCode("aCode");
         verify(productMapper).toDTO(product);
+    }
+
+    @Test
+    public void getProducts() {
+        List<Product> products = new ArrayList<>();
+        Product productOne = new Product();
+        productOne.setCode("aCode");
+
+        Product productTwo = new Product();
+        productOne.setCode("bCode");
+
+        products.add(productOne);
+        products.add(productTwo);
+
+        ProductDTO productOneDTO = new ProductDTO();
+        productOne.setCode("aCode");
+
+        ProductDTO productTwoDTO = new ProductDTO();
+        productOne.setCode("bCode");
+
+        when(productRepository.findAll()).thenReturn(products);
+        when(productMapper.toDTO(productOne)).thenReturn(productOneDTO);
+        when(productMapper.toDTO(productTwo)).thenReturn(productTwoDTO);
+
+        List<ProductDTO> productList = productService.getProducts();
+        assertThat(productList).hasSize(2);
+        assertThat(productList).containsOnly(productOneDTO, productTwoDTO);
+
+        verify(productRepository).findAll();
+        verify(productMapper).toDTO(productOne);
+        verify(productMapper).toDTO(productTwo);
+    }
+
+    @Test
+    public void updateProduct_whenProductCodeIsNull_shouldThrowAnException() {
+        ProductDTO productDTO = new ProductDTO();
+        InvalidProductCodeException invalidProductCodeException =
+                catchThrowableOfType(() -> productService.updateProduct(productDTO, 1L), InvalidProductCodeException.class);
+
+        assertThat(invalidProductCodeException).isNotNull();
+    }
+
+    @Test
+    public void updateProduct_whenProductDTOIsNull_shouldThrowAnException() {
+        ProductDTO productDTO = new ProductDTO();
+        InvalidProductCodeException invalidProductCodeException =
+                catchThrowableOfType(() -> productService.updateProduct(null, 1L), InvalidProductCodeException.class);
+
+        assertThat(invalidProductCodeException).isNotNull();
+    }
+
+    @Test
+    public void updateProduct_whenProductCodeIsInvalid_shouldThrowAnException() {
+        ProductDTO productDTO = new ProductDTO();
+        productDTO.setCode("code");
+        InvalidProductCodeException invalidProductCodeException =
+                catchThrowableOfType(() -> productService.updateProduct(productDTO, 1L), InvalidProductCodeException.class);
+
+        assertThat(invalidProductCodeException).isNotNull();
+    }
+
+    @Test
+    public void updateProduct_whenProductCodeIsValid_shouldUpdateTheProduct() throws InvalidProductCodeException {
+        ProductDTO productDTO = new ProductDTO();
+        productDTO.setCode("a new code");
+        productDTO.setDescription("a new description")  ;
+
+        Product product = new Product();
+        product.setCode("code");
+        product.setDescription("old description");
+
+        when(productRepository.findByCode(any())).thenReturn(Optional.of(product));
+        productService.updateProduct(productDTO, 1L);
+
+        verify(productRepository).findByCode(productDTO.getCode());
+        verify(productRepository).save(product);
+    }
+
+    @Test
+    public void deleteProduct_whenProductDTOIsNull_shouldThrowAnException() {
+        InvalidProductCodeException invalidProductCodeException =
+                catchThrowableOfType(() -> productService.deleteProduct(null, 1L), InvalidProductCodeException.class);
+
+        assertThat(invalidProductCodeException).isNotNull();
+    }
+
+    @Test
+    public void deleteProduct_whenProductCodeIsValid_shouldDeleteTheProduct() throws InvalidProductCodeException {
+        Product product = new Product();
+        product.setCode("aCode");
+        when(productRepository.findByCode(any())).thenReturn(Optional.of(product));
+        productService.deleteProduct("aCode", 1L);
+
+        verify(productRepository).findByCode("aCode");
+        verify(productRepository).delete(product);
     }
 }

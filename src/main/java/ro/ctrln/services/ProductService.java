@@ -36,10 +36,10 @@ public class ProductService {
     }
 
     public void updateProduct(ProductDTO productDTO, Long customerId) throws InvalidProductCodeException {
-        log.info("Customer with id {} is trying to update product {}", customerId, productDTO.getCode());
-        if (productDTO.getCode() == null) {
+        if (productDTO == null || productDTO.getCode() == null) {
             throw new InvalidProductCodeException();
         }
+        log.info("Customer with id {} is trying to update product {}", customerId, productDTO.getCode());
 
         Product product = getProductEntity(productDTO.getCode());
         product.setDescription(productDTO.getDescription());
