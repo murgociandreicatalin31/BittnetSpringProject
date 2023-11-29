@@ -39,4 +39,9 @@ public class ProductController {
     public List<ProductDTO> getProducts() {
         return productService.getProducts();
     }
+
+    @PatchMapping("/{productCode}/{quantity}/{customerId}")
+    public void addStock(@PathVariable String productCode, @PathVariable Integer quantity, @PathVariable Long customerId) throws InvalidProductCodeException {
+        productService.addStock(productCode, quantity, customerId);
+    }
 }

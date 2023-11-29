@@ -60,15 +60,25 @@ public class ProductService {
         productRepository.delete(product);
     }
 
+    public List<ProductDTO> getProducts() {
+        return productRepository.findAll().stream().map(productMapper::toDTO).collect(Collectors.toList());
+    }
+
+    public void addStock(String productCode, Integer quantity, Long customerId) throws InvalidProductCodeException {
+        if (productCode == null) {
+            throw new InvalidProductCodeException();
+        }
+
+        Product product = getProductEntity(productCode);
+        product.setStock(product.getStock() + quantity);
+        productRepository.save(product);
+    }
+
     private Product getProductEntity(String productCode) throws InvalidProductCodeException {
         Optional<Product> product = productRepository.findByCode(productCode);
         if (!product.isPresent()) {
             throw new InvalidProductCodeException();
         }
         return product.get();
-    }
-
-    public List<ProductDTO> getProducts() {
-        return productRepository.findAll().stream().map(productMapper::toDTO).collect(Collectors.toList());
     }
 }
