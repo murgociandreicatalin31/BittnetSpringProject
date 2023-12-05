@@ -23,6 +23,8 @@ public class OnlineOrder {
     @JoinColumn(name = "order_id")
     private List<OnlineOrderItem> orderItems;
 
+    private double totalPrice;
+
     private boolean delivered;
     private boolean returned;
     private boolean cancelled;
