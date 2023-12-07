@@ -18,4 +18,9 @@ public class OrderController {
             InvalidQuantityException, NotEnoughStockException, InvalidProductsException, InvalidCustomerIdException {
         orderService.addOrder(orderDTO, customerId);
     }
+
+    @PatchMapping("/{orderId}/{customerId}")
+    public void deliver(@PathVariable Long orderId, @PathVariable Long customerId) throws InvalidOrderIdException, OrderCancelledException, OrderDeliveredException {
+        orderService.deliverOrder(orderId, customerId);
+    }
 }

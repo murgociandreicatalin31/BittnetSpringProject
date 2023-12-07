@@ -28,4 +28,19 @@ public class OnlineOrderHandler {
     public ResponseEntity<String> handleInvalidProductsException() {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The order does not contain any products!");
     }
+
+    @ExceptionHandler(InvalidOrderIdException.class)
+    public ResponseEntity<String> handleInvalidOrderIdException() {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No valid order ID has been transmitted!");
+    }
+
+    @ExceptionHandler(OrderCancelledException.class)
+    public ResponseEntity<String> handleOrderCancelledException() {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The order has already been cancelled!");
+    }
+
+    @ExceptionHandler(OrderDeliveredException.class)
+    public ResponseEntity<String> handleOrderDeliveredException() {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The order has already been delivered!");
+    }
 }

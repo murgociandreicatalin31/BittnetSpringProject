@@ -50,6 +50,11 @@ public class SecurityAspect {
 
     }
 
+    @Pointcut("execution(* ro.ctrln.services.OrderService.deliverOrder(..))")
+    public void deliverOrderPointcut() {
+
+    }
+
     @Before("ro.ctrln.aspects.SecurityAspect.addProductPointcut()")
     public void checkSecurityBeforeAddingProduct(JoinPoint joinPoint) throws InvalidCustomerIdException, InvalidOperationException {
         Long customerId = (Long) joinPoint.getArgs()[1];
@@ -110,6 +115,18 @@ public class SecurityAspect {
         log.info("Customer ID: {} will ADD an ORDER!", customerId);
     }
 
+    @Before("ro.ctrln.aspects.SecurityAspect.deliverOrderPointcut()")
+    public void checkSecurityBeforeDeliveringAnOrder(JoinPoint joinPoint) throws InvalidCustomerIdException, InvalidOperationException {
+        Long customerId = (Long) joinPoint.getArgs()[1];
+        User user = getUser(customerId);
+
+        if(userIsNotAllowedOperation(user.getRoles(), Operations.DELIVER_ORDER)) {
+            throw new InvalidOperationException("Customer NOT allowed to DELIVER an ORDER!");
+        }
+
+        log.info("Customer ID: {} will DELIVER an ORDER!", customerId);
+    }
+
     private User getUser(Long customerId) throws InvalidCustomerIdException {
         Optional<User> userOptional = userRepository.findById(customerId);
         if(!userOptional.isPresent()) {
@@ -128,6 +145,8 @@ public class SecurityAspect {
                 return !roles.contains(Roles.ADMIN) && !roles.contains(Roles.EDITOR);
             case ADD_ORDER:
                 return !roles.contains(Roles.CLIENT);
+            case DELIVER_ORDER:
+                return !roles.contains(Roles.EXPEDITOR);
         }
         return false;
     }

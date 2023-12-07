@@ -59,6 +59,28 @@ public class OrderService {
         onlineOrderRepository.save(onlineOrder);
     }
 
+    public void deliverOrder(Long orderId, Long customerId) throws InvalidOrderIdException, OrderCancelledException, OrderDeliveredException {
+        if(orderId == null) {
+            throw new InvalidOrderIdException();
+        }
+
+        OnlineOrder onlineOrder = onlineOrderRepository.findOneById(orderId);
+        if(onlineOrder == null) {
+            throw new InvalidOrderIdException();
+        }
+
+        if(onlineOrder.isCancelled()) {
+            throw new OrderCancelledException();
+        }
+
+        if(onlineOrder.isDelivered()) {
+            throw new OrderDeliveredException();
+        }
+
+        onlineOrder.setDelivered(true);
+        onlineOrderRepository.save(onlineOrder);
+    }
+
     private void validateStock(OrderDTO orderDTO) throws InvalidProductIdException, InvalidQuantityException, NotEnoughStockException, InvalidProductsException {
         if(orderDTO == null || orderDTO.getProducts().isEmpty()) {
             throw new InvalidProductsException();
@@ -73,4 +95,6 @@ public class OrderService {
             }
         }
     }
+
+
 }

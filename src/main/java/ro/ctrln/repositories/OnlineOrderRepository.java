@@ -6,4 +6,6 @@ import ro.ctrln.entities.OnlineOrder;
 
 @Repository
 public interface OnlineOrderRepository extends CrudRepository<OnlineOrder, Long> {
+
+    OnlineOrder findOneById(Long orderId);
 }
