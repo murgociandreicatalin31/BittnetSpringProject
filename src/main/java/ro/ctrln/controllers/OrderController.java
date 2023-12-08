@@ -20,7 +20,20 @@ public class OrderController {
     }
 
     @PatchMapping("/{orderId}/{customerId}")
-    public void deliver(@PathVariable Long orderId, @PathVariable Long customerId) throws InvalidOrderIdException, OrderCancelledException, OrderDeliveredException {
+    public void deliverOrder(@PathVariable Long orderId, @PathVariable Long customerId) throws InvalidOrderIdException,
+            OrderCancelledException, OrderDeliveredException {
         orderService.deliverOrder(orderId, customerId);
+    }
+
+    @PatchMapping("/cancel/{orderId}/{customerId}")
+    public void cancelOrder(@PathVariable Long orderId, @PathVariable Long customerId) throws OrderCancelledException,
+            InvalidOrderIdException, OrderDeliveredException {
+        orderService.cancelOrder(orderId, customerId);
+    }
+
+    @PatchMapping("/return/{orderId}/{customerId}")
+    public void returnOrder(@PathVariable Long orderId, @PathVariable Long customerId) throws OrderCancelledException,
+            InvalidOrderIdException, OrderDeliveredException, OrderNotYetDeliveredException {
+        orderService.returnOrder(orderId, customerId);
     }
 }

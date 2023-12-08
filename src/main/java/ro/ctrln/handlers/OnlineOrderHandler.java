@@ -43,4 +43,9 @@ public class OnlineOrderHandler {
     public ResponseEntity<String> handleOrderDeliveredException() {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The order has already been delivered!");
     }
+
+    @ExceptionHandler(OrderNotYetDeliveredException.class)
+    public ResponseEntity<String> handleOrderNotYetDeliveredYetException() {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The order has not been delivered yet!");
+    }
 }

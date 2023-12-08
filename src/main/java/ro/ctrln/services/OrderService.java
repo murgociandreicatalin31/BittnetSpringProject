@@ -50,7 +50,6 @@ public class OrderService {
                 onlineOrderItem.setProduct(dbProduct);
                 onlineOrder.setTotalPrice(onlineOrder.getTotalPrice() + (onlineOrderItem.getQuantity() * dbProduct.getPrice()));
                 dbProduct.setStock(dbProduct.getStock() - onlineOrderItem.getQuantity());
-                //productRepository.save(dbProduct);
                 onlineOrderItems.add(onlineOrderItem);
             }
         }
@@ -60,6 +59,41 @@ public class OrderService {
     }
 
     public void deliverOrder(Long orderId, Long customerId) throws InvalidOrderIdException, OrderCancelledException, OrderDeliveredException {
+        OnlineOrder onlineOrder = getOnlineOrder(orderId);
+        if(onlineOrder.isDelivered()) {
+            throw new OrderDeliveredException();
+        }
+        onlineOrder.setDelivered(true);
+        onlineOrderRepository.save(onlineOrder);
+    }
+
+    public void cancelOrder(Long orderId, Long customerId) throws InvalidOrderIdException, OrderCancelledException, OrderDeliveredException {
+
+        OnlineOrder onlineOrder = getOnlineOrder(orderId);
+        if(onlineOrder.isDelivered()) {
+            throw new OrderDeliveredException();
+        }
+        onlineOrder.setCancelled(true);
+        onlineOrderRepository.save(onlineOrder);
+    }
+
+    public void returnOrder(Long orderId, Long customerId) throws OrderCancelledException, InvalidOrderIdException,
+            OrderDeliveredException, OrderNotYetDeliveredException {
+
+        OnlineOrder onlineOrder = getOnlineOrder(orderId);
+        if(!onlineOrder.isDelivered()) {
+            throw new OrderNotYetDeliveredException();
+        }
+
+        onlineOrder.setReturned(true);
+        onlineOrder.getOrderItems().forEach(onlineOrderItem -> {
+            Product product = onlineOrderItem.getProduct();
+            product.setStock(product.getStock() + onlineOrderItem.getQuantity());
+        });
+        onlineOrderRepository.save(onlineOrder);
+    }
+
+    private OnlineOrder getOnlineOrder(Long orderId) throws InvalidOrderIdException, OrderCancelledException, OrderDeliveredException {
         if(orderId == null) {
             throw new InvalidOrderIdException();
         }
@@ -73,12 +107,7 @@ public class OrderService {
             throw new OrderCancelledException();
         }
 
-        if(onlineOrder.isDelivered()) {
-            throw new OrderDeliveredException();
-        }
-
-        onlineOrder.setDelivered(true);
-        onlineOrderRepository.save(onlineOrder);
+        return onlineOrder;
     }
 
     private void validateStock(OrderDTO orderDTO) throws InvalidProductIdException, InvalidQuantityException, NotEnoughStockException, InvalidProductsException {
@@ -95,6 +124,4 @@ public class OrderService {
             }
         }
     }
-
-
 }

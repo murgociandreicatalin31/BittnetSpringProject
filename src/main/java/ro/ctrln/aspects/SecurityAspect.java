@@ -55,6 +55,16 @@ public class SecurityAspect {
 
     }
 
+    @Pointcut("execution(* ro.ctrln.services.OrderService.cancelOrder(..))")
+    public void cancelOrderPointcut() {
+
+    }
+
+    @Pointcut("execution(* ro.ctrln.services.OrderService.returnOrder(..))")
+    public void returnOrderPointcut() {
+
+    }
+
     @Before("ro.ctrln.aspects.SecurityAspect.addProductPointcut()")
     public void checkSecurityBeforeAddingProduct(JoinPoint joinPoint) throws InvalidCustomerIdException, InvalidOperationException {
         Long customerId = (Long) joinPoint.getArgs()[1];
@@ -127,6 +137,30 @@ public class SecurityAspect {
         log.info("Customer ID: {} will DELIVER an ORDER!", customerId);
     }
 
+    @Before("ro.ctrln.aspects.SecurityAspect.cancelOrderPointcut()")
+    public void checkSecurityBeforeCancellingAnOrder(JoinPoint joinPoint) throws InvalidCustomerIdException, InvalidOperationException {
+        Long customerId = (Long) joinPoint.getArgs()[1];
+        User user = getUser(customerId);
+
+        if(userIsNotAllowedOperation(user.getRoles(), Operations.CANCEL_ORDER)) {
+            throw new InvalidOperationException("Customer NOT allowed to CANCEL an ORDER!");
+        }
+
+        log.info("Customer ID: {} will CANCEL an ORDER!", customerId);
+    }
+
+    @Before("ro.ctrln.aspects.SecurityAspect.returnOrderPointcut()")
+    public void checkSecurityBeforeReturningAnOrder(JoinPoint joinPoint) throws InvalidCustomerIdException, InvalidOperationException {
+        Long customerId = (Long) joinPoint.getArgs()[1];
+        User user = getUser(customerId);
+
+        if(userIsNotAllowedOperation(user.getRoles(), Operations.RETURN_ORDER)) {
+            throw new InvalidOperationException("Customer NOT allowed to RETURN an ORDER!");
+        }
+
+        log.info("Customer ID: {} will RETURN an ORDER!", customerId);
+    }
+
     private User getUser(Long customerId) throws InvalidCustomerIdException {
         Optional<User> userOptional = userRepository.findById(customerId);
         if(!userOptional.isPresent()) {
@@ -144,6 +178,8 @@ public class SecurityAspect {
             case UPDATE_PRODUCT:
                 return !roles.contains(Roles.ADMIN) && !roles.contains(Roles.EDITOR);
             case ADD_ORDER:
+            case CANCEL_ORDER:
+            case RETURN_ORDER:
                 return !roles.contains(Roles.CLIENT);
             case DELIVER_ORDER:
                 return !roles.contains(Roles.EXPEDITOR);
